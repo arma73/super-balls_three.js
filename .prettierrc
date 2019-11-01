@@ -1,0 +1,12 @@
+{
+    "printWidth": 150,
+    "trailingComma": "none",
+    "tabWidth": 4,
+    "semi": true,
+    "doubleQuote": true,
+    "singleQuote": false,
+    "bracketSpacing": true,
+    "arrowParens": "avoid",
+    "requirePragma": true,
+    "formatOnSave": true
+}
