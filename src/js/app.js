@@ -1,194 +1,118 @@
 //Modules
 import * as THREE from "three";
-import PhotoTexture from "Textures/Chess_texture.png";
-import GUI from "./GUI";
+import { createCamera, createControls, camera } from "./Camera_Controls";
+import {createLights, mainLight} from "./Lights";
+import {createMeshes, spheres, sphere} from "./Meshes";
+import {createRenderer, renderer} from "./Renderer";
+import GUI from "./Helpers/GUI";
+import { gridHelper, spotLightHelper, axiseHelper } from "./Helpers/helpers";
+import { RenderPass } from "./Helpers/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "./Helpers/postprocessing/UnrealBloomPass";
+import { EffectComposer } from "./Helpers/postprocessing/EffectComposer";
+
 
 const OrbitControls = require("three-orbit-controls")(THREE);
-
-
 //Styles
-import "../assets/scss/app.scss";//GlobalStyles
+import "GlobalStyles";
 
 // these need to be accessed inside more than one function so we"ll declare them first
-let container;
-let camera;
-let controls;
-let renderer;
-let scene;
+let scene, composer;
+
+function drawSquare(x1, y1, x2, y2) {
+	const square = new THREE.Geometry();
+
+	square.vertices.push(new THREE.Vector3(x1, y1, 0));
+	square.vertices.push(new THREE.Vector3(x1, y2, 0));
+	square.vertices.push(new THREE.Vector3(x2, y1, 0));
+	square.vertices.push(new THREE.Vector3(x2, y2, 0));
+
+	square.faces.push(new THREE.Face3(0, 1, 2));
+	square.faces.push(new THREE.Face3(1, 2, 3));
+	return square;
+}
+
 
 function init() {
-
-  container = document.querySelector( "#scene-container" );
-
   scene = new THREE.Scene();
-  scene.background = new THREE.Color( 0x8FBCD4 );
-
+  scene.background = new THREE.Color( 0x000000 );
   createCamera();
-  createControls();
-  createLights();
-  createMeshes();
+  createControls(OrbitControls);
+  createLights(scene);
+  createMeshes(scene);
   createRenderer();
 
-  renderer.setAnimationLoop( () => {
+  var square_material = new THREE.LineBasicMaterial( { color: 0x0000ff,side: THREE.DoubleSide } );
 
-	update();
-	render();
+  var square_geometry = drawSquare(0,10,15,0);
+  var square_Line = new THREE.Line(square_geometry, square_material);
+  scene.add(square_Line);
 
-  } );
+  var square_material = new THREE.LineBasicMaterial({
+	color: 0x0000ff
+});
 
-}
 
-function createCamera() {
+	
+	var params = {
+		bloomStrength: 0.8,
+		bloomThreshold: 0.1,
+		bloomRadius: 0.5
+	};
 
-  camera = new THREE.PerspectiveCamera( 35, container.clientWidth / container.clientHeight, 0.1, 100 );
-  camera.position.set( -5, 5, 7 );
 
-}
+	var renderScene = new RenderPass(spheres, camera);
 
-function createControls() {
+	var bloomPass = new UnrealBloomPass( new THREE.SphereBufferGeometry(Math.Pi / 100, 50, 50, 0, Math.PI * 2, 0, Math.PI * 2), params.bloomStrength, params.bloomRadius, params.bloomThreshold);
+	bloomPass.threshold = params.bloomThreshold;
+	bloomPass.strength = params.bloomStrength;
+	bloomPass.radius = params.bloomRadius;
 
-  controls = new THREE.OrbitControls( camera, container );
+	composer = new EffectComposer(renderer);
 
-}
+	composer.setSize(window.innerWidth, window.innerHeight);
+	composer.addPass(renderScene);
+	composer.addPass(bloomPass);
 
-function createLights() {
 
-  const ambientLight = new THREE.HemisphereLight( 0xddeeff, 0x0f0e0d, 5 );
+	GUI(camera, spheres, mainLight );
 
-  const mainLight = new THREE.DirectionalLight( 0xffffff, 5 );
-  mainLight.position.set( 10, 10, 10 );
+	renderer.setAnimationLoop( () => {
+		update();
+		render();
+		// composer.render();
+	} );
 
-  scene.add( ambientLight, mainLight );
+	gridHelper(scene);
+	// spotLightHelper(scene);
+	axiseHelper(scene);
 
-}
+};
 
-function createMaterials() {
+var frame = 0,
+maxFrame = 200;
 
-  const body = new THREE.MeshStandardMaterial( {
-	color: 0xff3333, // red
-	flatShading: true,
-  } );
+function update() {
+	var per = frame / maxFrame,
+	bias = Math.abs(0.5 - per) / 0.5;
 
-  // just as with textures, we need to put colors into linear color space
-  body.color.convertSRGBToLinear();
+	spheres.position.set(0,  -1 + 2 * bias, 0);
+	frame += 1;
+	frame = frame % maxFrame;
 
-  const detail = new THREE.MeshStandardMaterial( {
-	color: 0x333333, // darkgrey
-	flatShading: true,
-  } );
 
-  detail.color.convertSRGBToLinear();
-
-  return {
-
-	body,
-	detail,
-
-  };
-
-}
-
-function createGeometries() {
-
-  const nose = new THREE.CylinderBufferGeometry( 0.75, 0.75, 3, 12 );
-
-  const cabin = new THREE.BoxBufferGeometry( 2, 2.25, 1.5 );
-
-  const chimney = new THREE.CylinderBufferGeometry( 0.3, 0.1, 0.5 );
-
-  // we can reuse a single cylinder geometry for all 4 wheels
-  const wheel = new THREE.CylinderBufferGeometry( 0.4, 0.4, 1.75, 16 );
-  wheel.rotateX( Math.PI / 2 );
-
-  return {
-	nose,
-	cabin,
-	chimney,
-	wheel,
-  };
-
-}
-
-function createMeshes() {
-
-  // create a Group to hold the pieces of the train
-  const train = new THREE.Group();
-  scene.add( train );
-
-  const materials = createMaterials();
-  const geometries = createGeometries();
-
-  const nose = new THREE.Mesh( geometries.nose, materials.body );
-  nose.rotation.z = Math.PI / 2;
-  nose.position.x = -1;
-
-  const cabin = new THREE.Mesh( geometries.cabin, materials.body );
-  cabin.position.set( 1.5, 0.4, 0 );
-
-  const chimney = new THREE.Mesh( geometries.chimney, materials.detail );
-  chimney.position.set( -2, 0.9, 0 );
-
-  const smallWheelRear = new THREE.Mesh( geometries.wheel, materials.detail );
-  smallWheelRear.position.set( 0, -0.5, 0 );
-
-  const smallWheelCenter = smallWheelRear.clone();
-  smallWheelCenter.position.x = -1;
-
-  const smallWheelFront = smallWheelRear.clone();
-  smallWheelFront.position.x = -2;
-
-  const bigWheel = smallWheelRear.clone();
-  bigWheel.scale.set( 2, 2, 1.25 );
-  bigWheel.position.set( 1.5, -0.1, 0 );
-
-  train.add(
-
-	nose,
-	cabin,
-	chimney,
-
-	smallWheelRear,
-	smallWheelCenter,
-	smallWheelFront,
-	bigWheel,
-
-  );
-
-}
-
-function createRenderer() {
-
-  renderer = new THREE.WebGLRenderer( { antialias: true } );
-  renderer.setSize( container.clientWidth, container.clientHeight );
-
-  renderer.setPixelRatio( window.devicePixelRatio );
-
-  renderer.gammaFactor = 2.2;
-  renderer.gammaOutput = true;
-
-  renderer.physicallyCorrectLights = true;
-
-  container.appendChild( renderer.domElement );
-
-}
-
-function update() {}
+};
 
 function render() {
   renderer.render( scene, camera );
-}
+};
 
 function onWindowResize() {
-	camera.aspect = container.clientWidth / container.clientHeight;
+	camera.aspect = window.innerWidth / window.innerHeight;
 	//update the camera"s frustum
 	camera.updateProjectionMatrix();
-	renderer.setSize( container.clientWidth, container.clientHeight );
+	renderer.setSize( window.innerWidth, window.innerHeight );
 };
 
 window.addEventListener( "resize", onWindowResize );
 
 init();
-
-const createControls = () => {
-	controls = new OrbitControls(camera);
-};
