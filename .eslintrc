@@ -18,7 +18,7 @@
     "arrow-parens": [2, "as-needed", { "requireForBlockBody": true }],
     "no-return-assign": 0,
     "brace-style": [2, "1tbs", { "allowSingleLine": true }],
-    "capitalized-comments": [2, "always"],
+    "capitalized-comments": 0,
     "comma-spacing": [
       2,
       {
@@ -104,7 +104,7 @@
     ],
     "padded-blocks": [2, "never"],
     "no-multiple-empty-lines": [2, { "max": 2, "maxEOF": 0, "maxBOF": 0 }],
-    "multiline-comment-style": [2, "starred-block"],
+    "multiline-comment-style": 0,
     "multiline-ternary": [2, "always-multiline"],
     "max-lines": [2, 100],
     "max-params": [2, 6],
