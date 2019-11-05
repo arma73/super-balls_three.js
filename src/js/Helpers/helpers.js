@@ -31,3 +31,9 @@ export const axiseHelper = (scene) => {
 
 	scene.add( helper );
 };
+
+export const randomInteger = (min = 0, max = 6) => {
+	const rand = min + Math.random() * (max + 1 - min);
+	
+	return Math.floor(rand);
+};
