@@ -10,62 +10,34 @@ import {createRenderer, renderer} from "./Renderer";
 
 const OrbitControls = require("three-orbit-controls")(THREE);
 
-
-
 //Styles
 import "GlobalStyles";
 
-let scene, camera2;
+let scene;
 let SEPARATION = 1, AMOUNTX = 20, AMOUNTY = 20;
 let particles, particle, count = 0;
-let currentCammera = camera;
-
-let lightProbe;
-let directionalLight;
-
-let API = {
-	lightProbeIntensity: 1.0,
-	directionalLightIntensity: 0.2,
-	envMapIntensity: 1
-};
 
 function init() {
 	scene = new THREE.Scene();
 	scene.background = new THREE.Color( 0x000000 );
 	createCamera();
-	createControls(OrbitControls, camera);
+	createControls(OrbitControls);
 	createLights(scene);
 	//createMeshes(scene);
 	createRenderer();
 
+	//gamma
+	renderer.gammaOutput = true;
+	renderer.gammaFactor = 2.2; // approximate sRGB
 
-	camera2 = new THREE.PerspectiveCamera(
-		60,
-		2,
-		0.1,
-		500,
-	);
-
-	camera2.position.set(14.5, 22, 35);
-	camera2.lookAt(0, 5, 0);
-
-	scene.add(camera2);
-	createControls(OrbitControls, camera2);
-
-	//Stars
-	let geometryStar = new THREE.BufferGeometry();
-	let vertices = [];
-
-	for ( let j = 0;  j < 100000; j++ ) {
-		vertices.push( THREE.Math.randFloatSpread( 3000 ) ); //x
-		vertices.push( THREE.Math.randFloatSpread( 3000 ) ); //y
-		vertices.push( THREE.Math.randFloatSpread( 3000 ) ); //z
-	}
-	geometryStar.setAttribute( "position", new THREE.Float32BufferAttribute( vertices, 3 ) );
-	let particlesStar = new THREE.Points( geometryStar, new THREE.PointsMaterial( { color: 0x888888 } ) );
-
-	scene.add( particlesStar );
-	//
+	//envmap
+	var genCubeUrls = function ( prefix, postfix ) {
+		return [
+			prefix + "px" + postfix, prefix + "nx" + postfix,
+			prefix + "py" + postfix, prefix + "ny" + postfix,
+			prefix + "pz" + postfix, prefix + "nz" + postfix
+		];
+	};
 
 	function createMaterial(random = Math.random()) {
 		const material = new THREE.MeshPhongMaterial({
@@ -87,11 +59,7 @@ function init() {
 	//Set up the sphere lets
 	let radius = earthContainerWidth/10, segments = 5, rings = 64;
 
-	// let  = new THREE.SphereBufferGeometry(radius, segments, rings, 0, Math.PI * 2, 0, Math.PI * 2);
-	const sphereRadius = .085;
-    const sphereWidthDivisions = 32;
-    const sphereHeightDivisions = 16;
-    const geometry = new THREE.SphereBufferGeometry(sphereRadius, sphereWidthDivisions, sphereHeightDivisions);
+	var geometry = new THREE.SphereBufferGeometry(radius, segments, rings, 0, Math.PI * 2, 0, Math.PI * 2);
 
 	let frame = 0, maxFrame = 200;
 
@@ -114,7 +82,7 @@ function init() {
 				let mesh = opacityMesh[i];
 
 
-				let bias = Math.abs(0.5 - per) / 0.5;
+				var bias = Math.abs(0.5 - per) / 0.5;
 
 				mesh.position.x =  -1 + 2 * bias - i / 8 / 2;
 				mesh.position.y =  1;
@@ -156,30 +124,10 @@ function init() {
 		update();
 		render();
 	} );
-
-	document.addEventListener( "keydown", onKeyDown, false );
-
-	//gridHelper(scene);
+	// gridHelper(scene);
 	//SpotLightHelper(scene);
-	//axiseHelper(scene);
+	// axiseHelper(scene);
 };
-
-function onKeyDown( event ) {
-	switch ( event.keyCode ) {
-		case 90: /*1*/
-			currentCammera = camera;
-			camera2.position.set(14.5, 22, 35);
-			camera2.lookAt(0, 5, 0);
-			break;
-		case 88: /*2*/
-			currentCammera = camera2;
-			camera.position.set( 19, 2, -15 );
-			camera.lookAt(0, 5, 0);
-			controls.target.set(0, 5, 0);
-			controls.update();
-			break;
-	}
-}
 
 const speedMesh = 0.04;
 
@@ -192,9 +140,6 @@ function update() {
 		//particle.position.y = Math.sin( ( ix + count ) * 0.5 )  + ( Math.sin( ( count ) * 0.5 ) );
 		for (let i = 0; i < particle.children.length; i++){
 			particle.children[i].position.y = Math.sin(( ix + count ) +  Math.sin( ( i / 4 ) * 0.13 ) * Math.PI);
-			// if (i !== particle.children.length - 1 ){
-			// 	particle.children[i].material.opacity = -particle.children[particle.children.length - i -1 ].position.y;
-			// }
 		};
 	};
 	camera.position.x -= Math.sin(2 * Math.PI) ** 2;
@@ -203,12 +148,7 @@ function update() {
 };
 
 function render() {
-	if (currentCammera === camera){
-		renderer.render(scene, camera2);
-	} else {
-		renderer.render( scene, camera );
-		
-	}
+	renderer.render( scene, camera );
 };
 
 function onWindowResize() {
