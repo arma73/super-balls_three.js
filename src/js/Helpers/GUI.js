@@ -1,7 +1,8 @@
 import * as dat from "dat.gui";
+import { format } from "path";
 
 //Dat gui
-const GUI = (camera, cube, light) => {
+const GUI = (camera, cube, light, guiVissible) => {
 	const gui = new dat.GUI();
 
 	if (camera){
@@ -10,12 +11,10 @@ const GUI = (camera, cube, light) => {
 		cameraGui.add(camera.position, "x");
 		cameraGui.add(camera.position, "y");
 		cameraGui.add(camera.position, "z");
-		cameraGui.open();
 
 		let fovCamera = gui.addFolder("camera projection");
 		
 		fovCamera.add(camera, "fov");
-		fovCamera.open();
 	};
 	
 	if (light){
@@ -24,7 +23,6 @@ const GUI = (camera, cube, light) => {
 		lightGui.add(light.position, "x");
 		lightGui.add(light.position, "y");
 		lightGui.add(light.position, "z");
-		lightGui.open();
 	};
 	 
 	if (cube){
@@ -33,7 +31,6 @@ const GUI = (camera, cube, light) => {
 		cubeGui.add(cube.position, "x");
 		cubeGui.add(cube.position, "y");
 		cubeGui.add(cube.position, "z");
-		cubeGui.open();
 
 		let cubeRotateGui = gui.addFolder("cube rotation");
 
@@ -42,6 +39,10 @@ const GUI = (camera, cube, light) => {
 		cubeRotateGui.add(cube.rotation, "z");
 		cubeRotateGui.open();
 	};
+	if (guiVissible){
+		let cameraVissible = gui.addFolder("camera Settings");
+		console.log(guiVissible);
+	}
 };
 
 export default GUI;

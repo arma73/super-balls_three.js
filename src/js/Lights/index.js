@@ -1,5 +1,5 @@
 import {AmbientLight, DirectionalLight} from "three";
-export let ambientLight, mainLight,otherLight;
+export let ambientLight, mainLight, otherLight;
 
 export const createLights = (scene) => {
 	ambientLight = new AmbientLight( 0x404040 );
