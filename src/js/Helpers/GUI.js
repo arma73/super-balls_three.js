@@ -2,7 +2,7 @@ import * as dat from "dat.gui";
 import { format } from "path";
 
 //Dat gui
-const GUI = (camera, cube, light, guiVissible) => {
+const GUI = (camera, cube, light) => {
 	const gui = new dat.GUI();
 
 	if (camera){
@@ -39,10 +39,7 @@ const GUI = (camera, cube, light, guiVissible) => {
 		cubeRotateGui.add(cube.rotation, "z");
 		cubeRotateGui.open();
 	};
-	if (guiVissible){
-		let cameraVissible = gui.addFolder("camera Settings");
-		console.log(guiVissible);
-	}
+
 };
 
 export default GUI;

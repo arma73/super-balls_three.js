@@ -3,6 +3,7 @@ import GUI from "./Helpers/GUI";
 import { GroupOne } from "./Helpers/colors";
 import { gridHelper, randomInteger, axiseHelper } from "./Helpers/helpers";
 import { LightProbeGenerator } from "./Helpers/LightProbeGenerator.js";
+import { OBJLoader2 } from "./Helpers/OBJLoader2";
 import { createCamera, createControls, camera, camera2, createCamera2, createControls2 } from "./Camera_Controls";
 import {createLights, mainLight} from "./Lights";
 import { spheres } from "./Meshes";
@@ -13,10 +14,13 @@ const OrbitControls = require("three-orbit-controls")(THREE);
 //Styles
 import "GlobalStyles";
 
-let scene, sceneTwo, canvas, view1Elem, view2Elem, cameraHelper, particlesStar;
+let scene, sceneTwo, canvas, view1Elem, view2Elem, cameraHelper, particlesStar, axesHelper, arrowHelperX, arrowHelperZ, arrowHelperY;
 let SEPARATION = 1, AMOUNTX = 20, AMOUNTY = 20;
 let particles, particle, count = 0;
 let currentCammera = camera;
+
+//
+let cameraEye, cameraHelperEye, cameraBox, parent, splineCamera;
 
 function init() {
 	scene = new THREE.Scene();
@@ -34,13 +38,74 @@ function init() {
 	cameraHelper = new THREE.CameraHelper(camera);
 
 	createControls(OrbitControls, camera, view1Elem);
+	createCamera2(sceneTwo);
 
-	createCamera2();
+	//
 
+	parent = new THREE.Object3D();
+	sceneTwo.add(parent);
+	
+	cameraEye = new THREE.Mesh(
+		new THREE.SphereBufferGeometry(.2, 32, 32),
+		new THREE.MeshBasicMaterial({color: 0xdddddd})
+	);
+
+	parent.add(camera2);
 	createControls2(OrbitControls, camera2, view2Elem);
-
 	scene.add(cameraHelper);
 	sceneTwo.add(cameraHelper);
+	parent.add(cameraEye);
+
+	axesHelper = new THREE.AxesHelper( 5 );
+	
+	//var polarGridHelper = new THREE.PolarGridHelper( 20, 16, 8, 64, 0x0088ff, 0x808f80 );
+
+	//polarGridHelper.position.y =0;
+	//polarGridHelper.position.x = 0;
+	//scene.add( polarGridHelper );
+
+	// function createAxis(obj) {
+	// 	let dir = new THREE.Vector3(obj.Vector3.x, obj.Vector3.y, obj.Vector3.z);
+		
+	// 	dir.normalize();
+	// 	let origin = new THREE.Vector3( 40, 10, -34);
+	// 	let length = obj.length;
+	// 	let hex = obj.color;
+
+	// }
+
+	//
+
+	let dirY = new THREE.Vector3( 0, 90, 0 );
+
+	dirY.normalize();
+
+	let origin = new THREE.Vector3( 0, 0, -34 );
+	let length = 5;
+	let hexY = 0x00FF00;
+
+	arrowHelperY = new THREE.ArrowHelper( dirY, origin, length, hexY );
+	sceneTwo.add( arrowHelperY );
+
+	let dirX = new THREE.Vector3( -90, 0, 0 );
+
+	dirX.normalize();
+	let hexX = 0xFF0000;
+
+
+	arrowHelperX = new THREE.ArrowHelper( dirX, origin, length, hexX );
+	sceneTwo.add( arrowHelperX );
+
+	let dirZ = new THREE.Vector3( 0, 0, -90 );
+	let hexZ = 0x000FFF ;
+
+
+	dirZ.normalize();
+
+	arrowHelperZ = new THREE.ArrowHelper( dirZ, origin, length, hexZ );
+	sceneTwo.add( arrowHelperZ );
+
+	//
 
 	//Stars
 	let geometryStar = new THREE.BufferGeometry();
@@ -156,7 +221,7 @@ function init() {
 		render();
 	} );
 
-	document.addEventListener( "keydown", onKeyDown, false );
+	// document.addEventListener( "keydown", onKeyDown, false );
 
 	//gridHelper(scene);
 	//SpotLightHelper(scene);
@@ -186,22 +251,22 @@ function setScissorForElement(elem) {
 	return width / height;
 }
 
-function onKeyDown( event ) {
-	switch ( event.keyCode ) {
-		case 90: /*1*/
-			currentCammera = camera;
-			camera2.position.set(20, 12, -35);
-			camera2.lookAt(0, 5, 0);
-			break;
-		case 88: /*2*/
-			currentCammera = camera2;
-			camera.position.set( 19, 2, -15 );
-			camera.lookAt(0, 5, 0);
-			controls.target.set(0, 5, 0);
-			controls.update();
-			break;
-	}
-}
+// function onKeyDown( event ) {
+// 	switch ( event.keyCode ) {
+// 		case 90: /*1*/
+// 			currentCammera = camera;
+// 			camera2.position.set(20, 12, -35);
+// 			camera2.lookAt(0, 5, 0);
+// 			break;
+// 		case 88: /*2*/
+// 			currentCammera = camera2;
+// 			camera.position.set( 19, 2, -15 );
+// 			camera.lookAt(0, 5, 0);
+// 			controls.target.set(0, 5, 0);
+// 			controls.update();
+// 			break;
+// 	}
+// }
 
 const speedMesh = 0.04;
 
@@ -219,8 +284,27 @@ function update() {
 			//}
 		};
 	};
-	camera.position.x -= Math.sin(2 * Math.PI) ** 2;
+	camera.position.x -= Math.sin(2 * Math.PI) ** 2 ;
+	cameraEye.position.x = camera.position.x;
+	cameraEye.position.y = camera.position.y;
+	cameraEye.position.z = camera.position.z;
+	arrowHelperX.position.x = camera.position.x;
+	arrowHelperX.position.y = camera.position.y;
+	arrowHelperX.position.z = camera.position.z;
+	arrowHelperY.position.x = camera.position.x;
+	arrowHelperY.position.y = camera.position.y;
+	arrowHelperY.position.z = camera.position.z;
+	arrowHelperZ.position.x = camera.position.x;
+	arrowHelperZ.position.y = camera.position.y;
+	arrowHelperZ.position.z = camera.position.z;
 	
+
+	//using arclength for stablization in look ahead
+
+	
+	//camera orientation 2 - up orientation via normal
+	camera2.matrix.lookAt(camera2.position, 5, 0);
+	camera2.far = camera.far + 2000;
 	count += 0.05;
 };
 

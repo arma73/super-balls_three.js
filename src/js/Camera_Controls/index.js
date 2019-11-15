@@ -2,8 +2,8 @@ import { PerspectiveCamera } from "three";
 export let camera, controls, camera2, controls2;
 
 export const createCamera = () => {
-	camera = new PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-	camera.position.set( 19, 2, -15 );
+	camera = new PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000 );
+	camera.position.set( 30, 2, -30);
 };
 
 export const createControls = (OrbitControls, camera, elem) => {
@@ -20,6 +20,6 @@ export const createControls2 = (OrbitControls, camera, elem) => {
 
 export const createCamera2 = () => {
 	camera2 = new PerspectiveCamera( 60, 2, 0.1, 700);
-	camera2.position.set(20, 12, -35);
+	camera2.position.set(45, 12, -40);
 	camera2.lookAt(0, 5, 0);
 };

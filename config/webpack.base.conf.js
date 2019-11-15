@@ -86,6 +86,14 @@ const conf = {
 				]
 			},
 			{
+				"test": /\.obj$/,
+				"loader": "webpack-obj-loader"
+			},
+			{
+				"test": /\.mtl$/,
+				"loader": "mtl-loader"
+			},
+			{
 				"test": /\.css$/i,
 				"use": [
 					"style-loader",
