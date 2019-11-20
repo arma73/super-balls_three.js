@@ -6,28 +6,34 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
   <style>
-    .keyTextBlock{
+    #info{
       position: absolute;
       color: white;
+      background: transparent;
+      text-align: center;
       z-index: 9999;
-      top: 50px;
+      top: 5px;
       width: 100%;
       margin-top: 15px; 
       margin-left: 15px;
     }
-    .keyText{
-      margin-top: 10px;
+    #info p {
+      margin-bottom: 10px;
     }
     canvas{
       position: relative;
     }
   </style>
+
 </head>
 <body>
-  <!-- <div class = "keyTextBlock">
-    <p class = "keyText" > Z - camera 1</p>
-    <p class = "keyText" > X - camera 2</p>
-  </div> -->
+  <div id="info">
+    <div clss = "ContentInfo">
+        <p> "W" translate | "E" rotate | "+" increase size | "-" decrease size </p>
+        <p> "Q" toggle world/local space </p>
+        <p> "X" toggle X | "Y" toggle Y | "Z" toggle Z | "Spacebar" toggle enabled </p>
+    </div>
+  </div>
 
   <!--
                      ,

@@ -1,31 +1,30 @@
 import * as THREE from "three";
 import GUI from "./Helpers/GUI";
-import { GroupOne } from "./Helpers/colors";
-import { gridHelper, randomInteger, axiseHelper } from "./Helpers/helpers";
-import { LightProbeGenerator } from "./Helpers/LightProbeGenerator.js";
-import { OBJLoader2 } from "./Helpers/OBJLoader2";
+import { THREERobot } from "./Meshes/CreateRobot";
+import {Controls} from "./Helpers/TransformControls";
 import { createCamera, createControls, camera, camera2, createCamera2, createControls2 } from "./Camera_Controls";
 import {createLights, mainLight} from "./Lights";
 import { spheres } from "./Meshes";
 import {createRenderer, renderer} from "./Renderer";
+const Three = Controls(THREE);
 
-const OrbitControls = require("three-orbit-controls")(THREE);
+const OrbitControls = require("three-orbit-controls")(Three);
 
 //Styles
 import "GlobalStyles";
 
 let scene, sceneTwo, canvas, view1Elem, view2Elem, cameraHelper, particlesStar, axesHelper, arrowHelperX, arrowHelperZ, arrowHelperY;
 let SEPARATION = 1, AMOUNTX = 20, AMOUNTY = 20;
-let particles, particle, count = 0;
+let particles, particle, count = 0, eye;
 let currentCammera = camera;
-
+let dragBoolean = false, modeControls = "translate";
 //
-let cameraEye, cameraHelperEye, cameraBox, parent, splineCamera;
+let cameraEye, cameraHelperEye, cameraBox, parent;
 
 function init() {
-	scene = new THREE.Scene();
-	sceneTwo = new THREE.Scene();
-	scene.background = new THREE.Color( 0x000000 );
+	scene = new Three.Scene();
+	sceneTwo = new Three.Scene();
+	scene.background = new Three.Color( 0x000000 );
 	createCamera();
 	createLights(scene);
 	//createMeshes(scene);
@@ -35,95 +34,120 @@ function init() {
 	canvas = document.querySelector("#canvas");
 	view1Elem = document.querySelector(".view1");
 	view2Elem = document.querySelector(".view2");
-	cameraHelper = new THREE.CameraHelper(camera);
+	cameraHelper = new Three.CameraHelper(camera);
 
-	createControls(OrbitControls, camera, view1Elem);
 	createCamera2(sceneTwo);
 
 	//
 
-	parent = new THREE.Object3D();
+	parent = new Three.Object3D();
 	sceneTwo.add(parent);
 	
-	cameraEye = new THREE.Mesh(
-		new THREE.SphereBufferGeometry(.2, 32, 32),
-		new THREE.MeshBasicMaterial({color: 0xdddddd})
+	cameraEye = new Three.Mesh(
+		new Three.SphereBufferGeometry(.5, 32, 32),
+		new Three.MeshBasicMaterial({color: 0xdddddd})
 	);
+	cameraEye.position.x = camera.position.x;
+	cameraEye.position.y = camera.position.y;
+	cameraEye.position.z = camera.position.z;
+
+
+	camera.rotation.x = 0;
+	camera.rotation.y = 21.3;
+	camera.rotation.z = 0;
+	cameraEye.rotation.x = camera.rotation.x;
+	cameraEye.rotation.y = camera.rotation.y;
+	cameraEye.rotation.z = camera.rotation.z;
 
 	parent.add(camera2);
-	createControls2(OrbitControls, camera2, view2Elem);
+	const Controls2 = createControls2(OrbitControls, camera2, view2Elem);
+
+	Controls2.addEventListener("change", render);
 	scene.add(cameraHelper);
 	sceneTwo.add(cameraHelper);
 	parent.add(cameraEye);
 
-	axesHelper = new THREE.AxesHelper( 5 );
+	axesHelper = new Three.AxesHelper(5);
+
+	const domElement = document.querySelector(".view2");
+	const transformControls = new Three.TransformControls(camera2, domElement);
+
+	transformControls.addEventListener("change", render );
 	
-	//var polarGridHelper = new THREE.PolarGridHelper( 20, 16, 8, 64, 0x0088ff, 0x808f80 );
+	transformControls.addEventListener( "dragging-changed", ( event ) => {
+		dragBoolean = event.value;
+		Controls2.enabled = !event.value;
+	} );
 
-	//polarGridHelper.position.y =0;
-	//polarGridHelper.position.x = 0;
-	//scene.add( polarGridHelper );
+	try {
+		transformControls.attach(cameraEye);
+	  } catch (err) {
+		console.log(err);
+	}
 
-	// function createAxis(obj) {
-	// 	let dir = new THREE.Vector3(obj.Vector3.x, obj.Vector3.y, obj.Vector3.z);
-		
-	// 	dir.normalize();
-	// 	let origin = new THREE.Vector3( 40, 10, -34);
-	// 	let length = obj.length;
-	// 	let hex = obj.color;
+	sceneTwo.add(transformControls);
+	transformControls.setMode( "translate" );
 
-	// }
-
-	//
-
-	let dirY = new THREE.Vector3( 0, 90, 0 );
-
-	dirY.normalize();
-
-	let origin = new THREE.Vector3( 0, 0, -34 );
-	let length = 5;
-	let hexY = 0x00FF00;
-
-	arrowHelperY = new THREE.ArrowHelper( dirY, origin, length, hexY );
-	sceneTwo.add( arrowHelperY );
-
-	let dirX = new THREE.Vector3( -90, 0, 0 );
-
-	dirX.normalize();
-	let hexX = 0xFF0000;
-
-
-	arrowHelperX = new THREE.ArrowHelper( dirX, origin, length, hexX );
-	sceneTwo.add( arrowHelperX );
-
-	let dirZ = new THREE.Vector3( 0, 0, -90 );
-	let hexZ = 0x000FFF ;
-
-
-	dirZ.normalize();
-
-	arrowHelperZ = new THREE.ArrowHelper( dirZ, origin, length, hexZ );
-	sceneTwo.add( arrowHelperZ );
-
-	//
+	window.addEventListener( "keydown", function ( event ) {
+		switch ( event.keyCode ) {
+			case 81: //Q
+				transformControls.setSpace( transformControls.space === "local" ? "world" : "local" );
+				break;
+			case 17: //Ctrl
+				transformControls.setTranslationSnap( 100 );
+				transformControls.setRotationSnap( THREE.Math.degToRad( 15 ) );
+				break;
+			case 87: //W
+				modeControls = "translate";
+				transformControls.setMode( "translate" );
+				break;
+			case 69: //E
+				modeControls = "rotate";
+				transformControls.setMode( "rotate" );
+				break;
+			case 82: //R
+				transformControls.setMode( "scale" );	
+				break;
+			case 187:
+			case 107: //+, =, num+
+				transformControls.setSize( transformControls.size + 0.1 );
+				break;
+			case 189:
+			case 109: //-, _, num-
+				transformControls.setSize( Math.max( transformControls.size - 0.1, 0.1 ) );
+				break;
+			case 88: //X
+				transformControls.showX = ! transformControls.showX;
+				break;
+			case 89: //Y
+				transformControls.showY = ! transformControls.showY;
+				break;
+			case 90: //Z
+				transformControls.showZ = ! transformControls.showZ;
+				break;
+			case 32: //Spacebar
+				transformControls.enabled = ! transformControls.enabled;
+				break;
+		}
+	} );
 
 	//Stars
-	let geometryStar = new THREE.BufferGeometry();
+	let geometryStar = new Three.BufferGeometry();
 	let vertices = [];
 
 	for ( let j = 0;  j < 100000; j++ ) {
-		vertices.push( THREE.Math.randFloatSpread( 3000 ) ); //x
-		vertices.push( THREE.Math.randFloatSpread( 3000 ) ); //y
-		vertices.push( THREE.Math.randFloatSpread( 3000 ) ); //z
+		vertices.push( Three.Math.randFloatSpread( 3000 ) ); //x
+		vertices.push( Three.Math.randFloatSpread( 3000 ) ); //y
+		vertices.push( Three.Math.randFloatSpread( 3000 ) ); //z
 	}
-	geometryStar.setAttribute( "position", new THREE.Float32BufferAttribute( vertices, 3 ) );
-	particlesStar = new THREE.Points( geometryStar, new THREE.PointsMaterial( { color: 0x888888 } ) );
+	geometryStar.setAttribute( "position", new Three.Float32BufferAttribute( vertices, 3 ) );
+	particlesStar = new Three.Points( geometryStar, new Three.PointsMaterial( { color: 0x888888 } ) );
 
 	//
 
 	function createMaterial(random = Math.random()) {
-		const material = new THREE.MeshPhongMaterial({
-			side: THREE.DoubleSide
+		const material = new Three.MeshPhongMaterial({
+			side: Three.DoubleSide
 		});
 
 		const hue = random;
@@ -137,15 +161,12 @@ function init() {
 
 	
 	//Create the sphere"s material
-	const earthContainerWidth = 1;
 	//Set up the sphere lets
-	let radius = earthContainerWidth/10, segments = 5, rings = 64;
 
-	//let  = new THREE.SphereBufferGeometry(radius, segments, rings, 0, Math.PI * 2, 0, Math.PI * 2);
 	const sphereRadius = .085;
 	const sphereWidthDivisions = 32;
 	const sphereHeightDivisions = 16;
-	const geometry = new THREE.SphereBufferGeometry(sphereRadius, sphereWidthDivisions, sphereHeightDivisions);
+	const geometry = new Three.SphereBufferGeometry(sphereRadius, sphereWidthDivisions, sphereHeightDivisions);
 
 	let frame = 0, maxFrame = 200;
 
@@ -156,12 +177,12 @@ function init() {
 			const number = Math.random();
 
 			for (let j = 0; j < 11; j++){
-				opacityMesh[j] = new THREE.Mesh(geometry, createMaterial(number));
+				opacityMesh[j] = new Three.Mesh(geometry, createMaterial(number));
 			};
 		})();
 
 		const createGroup = () => {
-			const group = new THREE.Group();
+			const group = new Three.Group();
 			let per = frame / maxFrame;
 	
 			for ( let i = 0; i < opacityMesh.length; i++ ) {
@@ -220,12 +241,6 @@ function init() {
 		update();
 		render();
 	} );
-
-	// document.addEventListener( "keydown", onKeyDown, false );
-
-	//gridHelper(scene);
-	//SpotLightHelper(scene);
-	//axiseHelper(scene);
 };
 
 function setScissorForElement(elem) {
@@ -251,97 +266,59 @@ function setScissorForElement(elem) {
 	return width / height;
 }
 
-// function onKeyDown( event ) {
-// 	switch ( event.keyCode ) {
-// 		case 90: /*1*/
-// 			currentCammera = camera;
-// 			camera2.position.set(20, 12, -35);
-// 			camera2.lookAt(0, 5, 0);
-// 			break;
-// 		case 88: /*2*/
-// 			currentCammera = camera2;
-// 			camera.position.set( 19, 2, -15 );
-// 			camera.lookAt(0, 5, 0);
-// 			controls.target.set(0, 5, 0);
-// 			controls.update();
-// 			break;
-// 	}
-// }
-
-const speedMesh = 0.04;
-
 function update() {
 	let i = 0;
 
 	/*sphere*/
 	for ( let ix = particles.length; ix--;) {
 		particle = particles[ i++ ];
-		//particle.position.y = Math.sin( ( ix + count ) * 0.5 )  + ( Math.sin( ( count ) * 0.5 ) );
 		for (let i = 0; i < particle.children.length; i++){
-			particle.children[i].position.y = Math.sin(( ix + count ) +  Math.sin( ( i / 4 ) * 0.13 ) * Math.PI);
-			//if (i !== particle.children.length - 1 ){
-			//particle.children[i].material.opacity = -particle.children[particle.children.length - i -1 ].position.y;
-			//}
+			particle.children[i].position.y = Math.sin(( ix + count ) + Math.sin( ( i / 4 ) * 0.13 ) * Math.PI);
 		};
 	};
+		
+	
 	camera.position.x -= Math.sin(2 * Math.PI) ** 2 ;
-	cameraEye.position.x = camera.position.x;
-	cameraEye.position.y = camera.position.y;
-	cameraEye.position.z = camera.position.z;
-	arrowHelperX.position.x = camera.position.x;
-	arrowHelperX.position.y = camera.position.y;
-	arrowHelperX.position.z = camera.position.z;
-	arrowHelperY.position.x = camera.position.x;
-	arrowHelperY.position.y = camera.position.y;
-	arrowHelperY.position.z = camera.position.z;
-	arrowHelperZ.position.x = camera.position.x;
-	arrowHelperZ.position.y = camera.position.y;
-	arrowHelperZ.position.z = camera.position.z;
-	
 
-	//using arclength for stablization in look ahead
-
-	
-	//camera orientation 2 - up orientation via normal
 	camera2.matrix.lookAt(camera2.position, 5, 0);
 	camera2.far = camera.far + 2000;
 	count += 0.05;
 };
 
 function render() {
-	//if (currentCammera === camera){
-	//renderer.render( scene, camera2 );
-	//} else {
-	//renderer.render( scene, camera );
-	//}
-	//turn on the scissor
-
 	renderer.setScissorTest(true);
+	
+	if (dragBoolean){
+		switch (modeControls) {
+			case "translate":
+				camera.position.x = cameraEye.position.x;
+				camera.position.y = cameraEye.position.y;
+				camera.position.z = cameraEye.position.z;
+				break;
+			case "rotate":
+				camera.rotation.x = cameraEye.rotation.x;
+				camera.rotation.y = cameraEye.rotation.y;
+				camera.rotation.z = cameraEye.rotation.z;
+				break;
+		}
+	}
 
-	//render the original view
 	{
 		const aspect = setScissorForElement(view1Elem);
 
-		//adjust the camera for this aspect
 		camera.aspect = aspect;
 		camera.updateProjectionMatrix();
 		cameraHelper.update();
-		//don't draw the camera helper in the original view
 		cameraHelper.visible = false;
 		scene.add(particlesStar);
 		scene.background.set(0x000000);
-		//render
 		renderer.render(scene, camera);
 	}
-
-	//render from the 2nd camera
 	{
 		const aspect = setScissorForElement(view2Elem);
 
-		//adjust the camera for this aspect
 		camera2.aspect = aspect;
 		camera2.updateProjectionMatrix();
-		//draw the camera helper in the 2nd view
 		cameraHelper.visible = true;
 		scene.background.set(0x000000);
 		renderer.render(sceneTwo, camera2);
@@ -350,8 +327,9 @@ function render() {
 
 function onWindowResize() {
 	camera.aspect = window.innerWidth / window.innerHeight;
-	//update the camera"s frustum
+	camera2.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
+	camera2.updateProjectionMatrix();
 	renderer.setSize( window.innerWidth, window.innerHeight );
 };
 

@@ -10,16 +10,18 @@ export const createControls = (OrbitControls, camera, elem) => {
 	controls = new OrbitControls(camera, elem);
 	controls.target.set(0, 5, 0);
 	controls.update();
+	return controls;
 };
 
 export const createControls2 = (OrbitControls, camera, elem) => {
 	controls2 = new OrbitControls(camera, elem);
-	controls.target.set(0, 5, 0);
-	controls.update();
+	controls2.target.set(0, 5, 0);//
+	controls2.update();//
+	return controls2;
 };
 
 export const createCamera2 = () => {
 	camera2 = new PerspectiveCamera( 60, 2, 0.1, 700);
-	camera2.position.set(45, 12, -40);
-	camera2.lookAt(0, 5, 0);
+	camera2.position.set(45, 12, -50);
+	camera2.lookAt(0, 2, 0);
 };
