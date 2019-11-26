@@ -3,7 +3,16 @@ import { WebGLRenderer, ReinhardToneMapping } from "three";
 export let renderer;
 
 export const createRenderer = () => {
-	renderer = new WebGLRenderer( { antialias: true, preserveDrawingBuffer: true, powerPreference:  "low-power", failIfMajorPerformanceCaveat: true } );
+	renderer = new WebGLRenderer( { 
+		antialias: true, 
+		preserveDrawingBuffer: true, 
+		powerPreference:  "low-power", 
+		failIfMajorPerformanceCaveat: true,
+		depth: false
+	} );
+	renderer.autoClearColor = false;
+	renderer.autoClear = false;
+	
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	renderer.setPixelRatio( window.devicePixelRatio );
 	//

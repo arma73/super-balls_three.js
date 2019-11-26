@@ -25,7 +25,7 @@
     }
   </style>
 
-</head>
+<link href="./assets/css/app.d75fc11a79486f1a4daa.css" rel="stylesheet"></head>
 <body>
   <div id="info">
     <div clss = "ContentInfo">
@@ -34,8 +34,13 @@
         <p> "X" toggle X | "Y" toggle Y | "Z" toggle Z | "Spacebar" toggle enabled </p>
     </div>
   </div>
-    <script>
-      // (function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//cdn.jsdelivr.net/gh/Kevnz/stats.js/build/stats.min.js';document.head.appendChild(script);})()
-    </script>
-</body>
+  <script>
+    function setFocus(){
+      const canvas = document.querySelector(".split").focus();
+      console.log(document.querySelector(".split"))
+      console.log(canvas)
+    };
+    window.addEventListener("load", setFocus);
+  </script>
+<script type="text/javascript" src="./assets/js/vendors.d75fc11a79486f1a4daa.js"></script><script type="text/javascript" src="./assets/js/app.d75fc11a79486f1a4daa.js"></script></body>
 </html>

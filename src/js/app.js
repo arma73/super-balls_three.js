@@ -12,14 +12,15 @@ const OrbitControls = require("three-orbit-controls")(Three);
 
 //Styles
 import "GlobalStyles";
+window.addEventListener("load", (() => {})());
 
-let scene, sceneTwo, canvas, view1Elem, view2Elem, cameraHelper, particlesStar, axesHelper, arrowHelperX, arrowHelperZ, arrowHelperY;
+let scene, sceneTwo, canvas, view1Elem, view2Elem, cameraHelper, particlesStar, axesHelper, transformControls;
 let SEPARATION = 1, AMOUNTX = 20, AMOUNTY = 20;
 let particles, particle, count = 0, eye;
-let currentCammera = camera;
 let dragBoolean = false, modeControls = "translate";
+let clearFlag = false;
 //
-let cameraEye, cameraHelperEye, cameraBox, parent;
+let cameraEye, parent;
 
 function init() {
 	scene = new Three.Scene();
@@ -70,7 +71,7 @@ function init() {
 	axesHelper = new Three.AxesHelper(5);
 
 	const domElement = document.querySelector(".view2");
-	const transformControls = new Three.TransformControls(camera2, domElement);
+	transformControls = new Three.TransformControls(camera2, domElement);
 
 	transformControls.addEventListener("change", render );
 	
@@ -81,55 +82,13 @@ function init() {
 
 	try {
 		transformControls.attach(cameraEye);
-	  } catch (err) {
+		} catch (err) {
 		console.log(err);
 	}
 
 	sceneTwo.add(transformControls);
 	transformControls.setMode( "translate" );
 
-	window.addEventListener( "keydown", function ( event ) {
-		switch ( event.keyCode ) {
-			case 81: //Q
-				transformControls.setSpace( transformControls.space === "local" ? "world" : "local" );
-				break;
-			case 17: //Ctrl
-				transformControls.setTranslationSnap( 100 );
-				transformControls.setRotationSnap( THREE.Math.degToRad( 15 ) );
-				break;
-			case 87: //W
-				modeControls = "translate";
-				transformControls.setMode( "translate" );
-				break;
-			case 69: //E
-				modeControls = "rotate";
-				transformControls.setMode( "rotate" );
-				break;
-			case 82: //R
-				transformControls.setMode( "scale" );	
-				break;
-			case 187:
-			case 107: //+, =, num+
-				transformControls.setSize( transformControls.size + 0.1 );
-				break;
-			case 189:
-			case 109: //-, _, num-
-				transformControls.setSize( Math.max( transformControls.size - 0.1, 0.1 ) );
-				break;
-			case 88: //X
-				transformControls.showX = ! transformControls.showX;
-				break;
-			case 89: //Y
-				transformControls.showY = ! transformControls.showY;
-				break;
-			case 90: //Z
-				transformControls.showZ = ! transformControls.showZ;
-				break;
-			case 32: //Spacebar
-				transformControls.enabled = ! transformControls.enabled;
-				break;
-		}
-	} );
 
 	//Stars
 	let geometryStar = new Three.BufferGeometry();
@@ -143,6 +102,7 @@ function init() {
 	geometryStar.setAttribute( "position", new Three.Float32BufferAttribute( vertices, 3 ) );
 	particlesStar = new Three.Points( geometryStar, new Three.PointsMaterial( { color: 0x888888 } ) );
 
+	//
 	//
 
 	function createMaterial(random = Math.random()) {
@@ -212,7 +172,51 @@ function init() {
 		return createGroup();
 	};
 
-	
+	window.addEventListener( "keydown", function ( event ) {
+		switch ( event.keyCode ) {
+			case 81: //Q
+				transformControls.setSpace( transformControls.space === "local" ? "world" : "local" );
+				break;
+			case 17: //Ctrl
+				transformControls.setTranslationSnap( 100 );
+				transformControls.setRotationSnap( THREE.Math.degToRad( 15 ) );
+				break;
+			case 87: //W
+				modeControls = "translate";
+				transformControls.setMode( "translate" );
+				break;
+			case 69: //E
+				modeControls = "rotate";
+				transformControls.setMode( "rotate" );
+				break;
+			case 82: //R
+				transformControls.setMode( "scale" );	
+				break;
+			case 187:
+			case 107: //+, =, num+
+				transformControls.setSize( transformControls.size + 0.1 );
+				break;
+			case 189:
+			case 109: //-, _, num-
+				transformControls.setSize( Math.max( transformControls.size - 0.1, 0.1 ) );
+				break;
+			case 88: //X
+				transformControls.showX = ! transformControls.showX;
+				break;
+			case 89: //Y
+				transformControls.showY = ! transformControls.showY;
+				break;
+			case 90: //Z
+				transformControls.showZ = ! transformControls.showZ;
+				break;
+			case 67:
+				clearFlag = !clearFlag;
+				break;
+			case 32: //Spacebar
+				transformControls.enabled = ! transformControls.enabled;
+				break;
+		}
+	} );
 	/*******/
 	particles = new Array();
 	let i = 0;
@@ -231,6 +235,14 @@ function init() {
 			particle.position.x = ix * SEPARATION - ( ( AMOUNTX * SEPARATION ) / 2 );
 			particle.position.z = iy * SEPARATION - ( ( AMOUNTX * SEPARATION ) / 4 );
 			scene.add(particle);
+		};
+	};
+	let j = 0;
+	/*sphere*/
+	for ( let ix = particles.length; ix--;) {
+		particle = particles[ j++ ];
+		for (let i = 0; i < particle.children.length; i++){
+			particle.children[i].position.y = Math.sin(( ix + count ) + Math.sin( ( i / 4 ) * 0.13 ) * Math.PI);
 		};
 	};
 
@@ -267,16 +279,15 @@ function setScissorForElement(elem) {
 }
 
 function update() {
-	let i = 0;
-
+	let j = 0;
 	/*sphere*/
 	for ( let ix = particles.length; ix--;) {
-		particle = particles[ i++ ];
+		particle = particles[ j++ ];
 		for (let i = 0; i < particle.children.length; i++){
 			particle.children[i].position.y = Math.sin(( ix + count ) + Math.sin( ( i / 4 ) * 0.13 ) * Math.PI);
 		};
 	};
-		
+
 	
 	camera.position.x -= Math.sin(2 * Math.PI) ** 2 ;
 
@@ -310,7 +321,13 @@ function render() {
 		camera.updateProjectionMatrix();
 		cameraHelper.update();
 		cameraHelper.visible = false;
-		scene.add(particlesStar);
+
+		if (!clearFlag){
+			renderer.clear();
+			scene.add(particlesStar);
+		} else {
+			scene.remove( particlesStar )
+		}
 		scene.background.set(0x000000);
 		renderer.render(scene, camera);
 	}
@@ -321,6 +338,7 @@ function render() {
 		camera2.updateProjectionMatrix();
 		cameraHelper.visible = true;
 		scene.background.set(0x000000);
+		renderer.clear();
 		renderer.render(sceneTwo, camera2);
 	}
 };
