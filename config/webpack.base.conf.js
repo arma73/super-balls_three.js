@@ -24,7 +24,7 @@ const conf = {
 	"output":{
 		"filename": `${PATHS.assets}js/[name].[hash].js`,
 		"path": PATHS.dist,
-		"publicPath": "/"
+		"publicPath": "./"
 	},
 	"optimization": {
 		"minimizer": [new UglifyJsPlugin()],
