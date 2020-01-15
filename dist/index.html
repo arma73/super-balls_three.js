@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    #info{
+      position: absolute;
+      color: white;
+      background: transparent;
+      text-align: center;
+      z-index: 9999;
+      top: 5px;
+      width: 100%;
+      margin-top: 15px; 
+      margin-left: 15px;
+    }
+    #info p {
+      margin-bottom: 10px;
+    }
+    canvas{
+      position: relative;
+    }
+  </style>
+
+<link href="./assets/css/app.764138376c7ae049dd30.css" rel="stylesheet"></head>
+<body>
+  <div id="info">
+    <div clss = "ContentInfo">
+        <p> "W" translate | "E" rotate | "+" increase size | "-" decrease size </p>
+        <p> "Q" toggle world/local space | "C" Clear Flag </p>
+        <p> "X" toggle X | "Y" toggle Y | "Z" toggle Z | "Spacebar" toggle enabled </p>
+    </div>
+  </div>
+    <script>
+      // (function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//cdn.jsdelivr.net/gh/Kevnz/stats.js/build/stats.min.js';document.head.appendChild(script);})()
+    </script>
+<script type="text/javascript" src="./assets/js/vendors.764138376c7ae049dd30.js"></script><script type="text/javascript" src="./assets/js/app.764138376c7ae049dd30.js"></script></body>
+</html>
