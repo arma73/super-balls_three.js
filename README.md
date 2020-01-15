@@ -9,6 +9,7 @@ Animated 3D computer graphics created using the three.js JavaScript library, tog
   - Mesh path is a sinusoid 
     ![](screen/Sinusoid.png)
   - Each moving ball leaves a fading shadow
+  
     ![](screen/ShadowParticle.png)
   - Rendering is divided into two scenarios and we can observe with two different abstractions.
     ![](screen/Display.png)
