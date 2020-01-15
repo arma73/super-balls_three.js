@@ -6,27 +6,12 @@
  "main": "app.js",
  "scripts": {
   "dev": "webpack-dev-server --open --config ./config/webpack.dev.conf.js",
-  "build": "webpack --config ./config/webpack.build.conf.js",
-  "lint": "eslint --debug src/",
-  "lint:write": "eslint --debug src/ --fix",
-  "prettier": "prettier --write src/**/*.js"
+  "build": "webpack --config ./config/webpack.build.conf.js"
  },
  "browserslist": [
   "> 1%",
   "last 3 version"
  ],
- "husky": {
-  "hooks": {
-   "pre-commit": "lint-staged"
-  }
- },
- "lint-staged": {
-  "*.(js|jsx)": [
-   "npm run lint:write",
-   "npm run prettier",
-   "git add"
-  ]
- },
  "dependencies": {
   "es6-promise": "^4.2.5",
   "postprocessing": "^6.8.8",
