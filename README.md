@@ -1,8 +1,9 @@
 # Super Balls
 
-[![N|Solid](screen/Three.jpg)](https://threejs.org/)
+[![N|Solid](screen/favicon.png)](https://superballs.arma.now.sh/)
 
-Animated 3D computer graphics created using the three.js JavaScript library, together with HTML5 Canvas
+Animated 3D computer graphics created using the three.js JavaScript library, together with HTML5 Canvas.
+See at https://superballs.arma.now.sh/
 
 ### Features!
 

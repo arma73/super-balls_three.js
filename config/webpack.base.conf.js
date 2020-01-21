@@ -43,7 +43,6 @@ const conf = {
 		"rules":[
 			{
 				"test": /\.js$/,
-				"exclude": /node_moduled/,
 				"use": {
 					"loader": "babel-loader",
 					"options":{
@@ -116,14 +115,15 @@ const conf = {
 		}),
 		new CopyWebpackPlugin([
 			{ 
-				"from": `${PATHS.src}/${PATHS.assets}img`,
-				"to": `${PATHS.assets}img`
+				from: `${PATHS.src}/public`,
+				to: ""
 			}
 		]),
 		new HtmlWebpackPlugin({
 			"template": `${PATHS.src}/html/index.html`,
 			"filename": `${PATHS.dist}/index.html`
 		})
+	
 	],
 	"resolve": {
 		alias

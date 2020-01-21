@@ -1,3 +1,4 @@
+/*eslint-disable max-lines*/
 import * as THREE from "three";
 import GUI from "./Helpers/GUI";
 import { THREERobot } from "./Meshes/CreateRobot";
@@ -6,6 +7,8 @@ import { createCamera, createControls, camera, camera2, createCamera2, createCon
 import {createLights, mainLight} from "./Lights";
 import { spheres } from "./Meshes";
 import {createRenderer, renderer} from "./Renderer";
+import * as ServiceWorker from "./pwabuilder-sw-register";
+
 const Three = Controls(THREE);
 
 const OrbitControls = require("three-orbit-controls")(Three);
@@ -71,6 +74,7 @@ function init() {
 	axesHelper = new Three.AxesHelper(5);
 
 	const domElement = document.querySelector(".view2");
+
 	transformControls = new Three.TransformControls(camera2, domElement);
 
 	transformControls.addEventListener("change", render );
@@ -82,7 +86,7 @@ function init() {
 
 	try {
 		transformControls.attach(cameraEye);
-		} catch (err) {
+	} catch (err) {
 		console.log(err);
 	}
 
@@ -190,7 +194,7 @@ function init() {
 				transformControls.setMode( "rotate" );
 				break;
 			case 82: //R
-				transformControls.setMode( "scale" );	
+				transformControls.setMode( "scale" );
 				break;
 			case 187:
 			case 107: //+, =, num+
@@ -238,6 +242,7 @@ function init() {
 		};
 	};
 	let j = 0;
+
 	/*sphere*/
 	for ( let ix = particles.length; ix--;) {
 		particle = particles[ j++ ];
@@ -280,6 +285,7 @@ function setScissorForElement(elem) {
 
 function update() {
 	let j = 0;
+
 	/*sphere*/
 	for ( let ix = particles.length; ix--;) {
 		particle = particles[ j++ ];
@@ -326,7 +332,7 @@ function render() {
 			renderer.clear();
 			scene.add(particlesStar);
 		} else {
-			scene.remove( particlesStar )
+			scene.remove( particlesStar );
 		}
 		scene.background.set(0x000000);
 		renderer.render(scene, camera);
@@ -354,3 +360,4 @@ function onWindowResize() {
 window.addEventListener( "resize", onWindowResize );
 
 init();
+ServiceWorker.register();

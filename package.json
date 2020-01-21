@@ -1,7 +1,7 @@
 {
- "name": "threejs-es6-webpack-boilerplate",
+ "name": "Super_Balls",
  "version": "1.0.0",
- "description": "Boilerplate for Three.js projects set up with Babel for ES6 and compiled with webpack",
+ "description": "",
  "author": "-",
  "main": "app.js",
  "scripts": {
