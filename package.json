@@ -15,7 +15,7 @@
  "dependencies": {
   "es6-promise": "^4.2.5",
   "postprocessing": "^6.8.8",
-  "three": "^0.110.0",
+  "three": "^0.125.0",
   "three-obj-loader": "^1.1.3",
   "three-obj-mtl-loader": "^1.0.3",
   "three-orbit-controls": "^82.1.0",
